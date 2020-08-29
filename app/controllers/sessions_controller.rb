@@ -2,10 +2,11 @@ class SessionsController < ApplicationController
   skip_before_action :authorize
 
   def create
-    user = User.find_by( email: params[:email] )
-    if user.try(:authenticate, params[:password])
-      session[:user_id] = user.id
-      render json: { message: ['Welcome'] }, status: 200
+    @user = User.find_by( email: params[:email] )
+    if @user.try(:authenticate, params[:password])
+      session[:user_id] = @user.id
+      token = encode_token({ user_id: @user.id })
+      render json: {user: @user, token: token}, status: 200
     else
       render json: { message: ['Invalid user/password combination'] }, status: 400
     end
